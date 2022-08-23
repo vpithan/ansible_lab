@@ -19,18 +19,14 @@ Vagrant.configure("2") do |config|
         vb.name = "#{name}"
         vb.memory = conf["memory"]
         vb.cpus = conf["cpu"]
-        vb.customize ["modifyvm", :id, "--groups", "/iac"]
+        vb.customize ["modifyvm", :id, "--groups", "/mentoria"]
       end
       if "#{name}" == "ansible"
         machine.vm.provision "shell", inline: "apt-get update && apt-get install -y ansible"
+      else
+        machine.vm.provision "shell", inline: "cat /vagrant/key.pub >> /home/vagrant/.ssh/authorized_keys"
       end
-    config.vm.provision "shell", inline: <<-EOF
-      HOSTS=$(head -n7 /etc/hosts)
-      echo -e "$HOSTS" > /etc/hosts
-      echo '10.10.10.30 ansible.caiodelgado.example' >> /etc/hosts
-      echo '10.10.10.31 machine01.caiodelgado.example' >> /etc/hosts
-      echo '10.10.10.32 machine02.caiodelgado.example' >> /etc/hosts
-      EOF
     end
+    config.ssh.extra_args = ["-t", "cd /vagrant; bash --login"]
   end
 end
